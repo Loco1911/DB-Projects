@@ -99,7 +99,7 @@ ORDER BY
 select * FROM Clientes WHERE Nombre LIKE '%A%';
 
 -- 25
-select * from pedidos p where MontoTotal between  '100' and '200'
+select * from pedidos p where MontoTotal between  '100' and '200';
 
 -- 26
 select ClienteID, count(ClienteID) as Total_Pedidos from pedidos group by ClienteID order by Total_Pedidos desc limit 3;
@@ -111,4 +111,23 @@ select * from Productos where NombreProducto like 'P%';
 select * from detallepedidos dp inner join tp2.pedidos p on dp.PedidoID = p.ID where p.FechaPedido >= DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY);
 
 -- 29
-select
+select PedidoID, ProductoID, Cantidad, sum(Cantidad) as Cantidad_Productos from detallepedidos group by PedidoID, ProductoID, Cantidad;
+
+-- 30
+SELECT
+    c.ID,
+    c.Nombre,
+    p.FechaPedido,
+    COUNT(*) as NumeroPedidos
+FROM
+    Clientes c
+        JOIN
+    Pedidos p ON c.ID = p.ClienteID
+GROUP BY
+    c.ID,
+    c.Nombre,
+    p.FechaPedido
+HAVING
+    COUNT(*) > 1
+ORDER BY
+    p.FechaPedido, c.Nombre;
