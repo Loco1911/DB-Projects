@@ -131,3 +131,101 @@ HAVING
     COUNT(*) > 1
 ORDER BY
     p.FechaPedido, c.Nombre;
+
+-- 31
+create or replace view Pedidos_por_cliente as
+select ClienteID, Nombre, count(p.ID) as Total_Pedidos from pedidos p join tp2.clientes c on c.ID = p.ClienteID group by ClienteID order by Total_Pedidos desc;
+
+select * from Pedidos_por_cliente ppc;
+
+-- 32
+
+
+-- 46
+delimiter //
+drop procedure if exists pedidos_cliente_id;
+create procedure Pedidos_cliente_id(in id_cliente int)
+begin
+    declare cliente_existe int;
+
+    select count(*) into cliente_existe
+    from clientes
+    where id = id_cliente;
+
+    if cliente_existe = 0 then
+        signal sqlstate '45000'
+            set message_text = 'Error: El cliente especificado no existe.';
+    else
+        select * from pedidos p where ClienteID = id_cliente;
+    end if;
+end //
+
+call Pedidos_cliente_id(10);
+
+-- 47
+
+delimiter //
+drop procedure if exists pedidos_por_fechas;
+
+create procedure pedidos_por_fechas(in fecha_inicio date, in fecha_fin date)
+begin
+    select * from pedidos where FechaPedido between fecha_inicio and fecha_fin order by FechaPedido;
+end//
+
+call pedidos_por_fechas('2024-02-02', '2024-12-31');
+
+-- 48
+delimiter //
+drop procedure if exists stock_por_id;
+
+create procedure stock_por_id(in id_prod int)
+begin
+    declare producto_existe int;
+
+    select count(*) into producto_existe from productos where ID = id_prod;
+
+    if producto_existe = 0 then
+            signal sqlstate '45000'
+            set message_text = 'Error: El producto especificado no existe.';
+
+            else
+        select NombreProducto, Stock from productos p where ID = id_prod;
+    end if;
+end //
+
+call stock_por_id(2);
+
+-- 49
+delimiter //
+
+drop procedure if exists productos_por_rango;
+
+create procedure productos_por_rango(in precio_min int, in precio_max int)
+begin
+    select * from productos p where Precio between precio_min and precio_max order by Precio;
+end //
+
+call productos_por_rango(1, 47)
+
+-- 50
+delimiter //
+
+drop procedure if exists actualizar_stock_por_id;
+
+create procedure actualizar_stock_por_id(in id_prod int, in stock_nuevo int)
+begin
+    declare producto_existe int;
+
+    select count(*) into producto_existe from productos where ID = id_prod;
+
+    if producto_existe = 0 then
+        signal sqlstate '45000'
+            set message_text = 'Error: El producto especificado no existe.';
+    else
+        update productos set Stock = stock_nuevo where ID = id_prod;
+    end if;
+end //
+
+call actualizar_stock_por_id(1, 1912)
+
+select * from productos p where ID = 1;
